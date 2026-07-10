@@ -142,6 +142,7 @@
     border-radius: 10px;
     width: 220px;
     gap: 15px;
+    z-index: 1001;
   }
 
   .nav-right {
@@ -149,19 +150,33 @@
   }
 
   .header {
-  padding: 0 16px;
+    padding: 0 16px;
+  }
+
+  .nav-left h2 {
+    font-size: 18px;
+  }
+
+  .nav-left p {
+    display: none;
+  }
+
 }
 
-.nav-left h2 {
-  font-size: 18px;
-}
-
-.nav-left p {
+.mobile-auth {
   display: none;
 }
 
-.nav-middle.show {
-  z-index: 1001;
-}
+@media (max-width: 768px) {
+
+  .mobile-auth {
+    display: list-item;
+    color: white;
+    cursor: pointer;
+  }
+
+  .mobile-auth:hover {
+    color: #38bdf8;
+  }
 
 }

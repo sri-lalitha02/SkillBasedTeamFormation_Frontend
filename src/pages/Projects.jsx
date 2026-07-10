@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import AuthPrompt from "../components/AuthPrompt";
+import ProjectDetailsModal from "../components/ProjectDetailsModal";
 import {
   FaSearch,
   FaUsers,
@@ -21,7 +22,6 @@ const Projects = () => {
 
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [showModal, setShowModal] = useState(false);
 
   const token =
     localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -44,7 +44,7 @@ const Projects = () => {
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape") setShowModal(false);
+      if (e.key === "Escape") setSelectedProject(null);
     };
 
     window.addEventListener("keydown", handleEsc);
@@ -52,8 +52,12 @@ const Projects = () => {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = showModal ? "hidden" : "auto";
-  }, [showModal]);
+    document.body.style.overflow = selectedProject ? "hidden" : "auto";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedProject]);
 
   /* ================= FILTER ================= */
   const filteredProjects = projects.filter((project) => {
@@ -76,6 +80,17 @@ const Projects = () => {
   };
 
   if (!token) return <AuthPrompt />;
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="projects-page">
+          <h2>Loading projects...</h2>
+        </div>
+      </>
+    );
+  }
 
   return (
 
@@ -144,10 +159,7 @@ const Projects = () => {
                   <div className="buttons">
                     <button
                       className="view-btn"
-                      onClick={() => {
-                        setSelectedProject(project);
-                        setShowModal(true);
-                      }}
+                      onClick={() => setSelectedProject(project)}
                     >
                       View
                     </button>
@@ -169,29 +181,11 @@ const Projects = () => {
           )}
         </div>
       </div>
-      {showModal && selectedProject && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2>{selectedProject.projectName}</h2>
-            <p><strong>Category:</strong> {selectedProject.category}</p>
-
-            <p style={{ marginTop: "10px" }}>
-              {selectedProject.description}
-            </p>
-
-            <div style={{ marginTop: "10px" }}>
-              <strong>Skills:</strong>{" "}
-              {(selectedProject.requiredSkills || []).join(", ")}
-            </div>
-
-            <button
-              className="close-btn"
-              onClick={() => setShowModal(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
+      {selectedProject && (
+        <ProjectDetailsModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
       )}
     </>
   );

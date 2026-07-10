@@ -119,6 +119,52 @@ const Header = () => {
         >
           Dashboard
         </li>
+
+        {token ? (
+          <>
+            <li
+              className="mobile-auth"
+              onClick={() => {
+                navigate("/profile");
+                setMenuOpen(false);
+              }}
+            >
+              Profile
+            </li>
+
+            <li
+              className="mobile-auth"
+              onClick={() => {
+                handleLogout();
+                setMenuOpen(false);
+              }}
+            >
+              Logout
+            </li>
+          </>
+        ) : (
+          <>
+            <li
+              className="mobile-auth"
+              onClick={() => {
+                navigate("/login");
+                setMenuOpen(false);
+              }}
+            >
+              Login
+            </li>
+
+            <li
+              className="mobile-auth"
+              onClick={() => {
+                navigate("/register");
+                setMenuOpen(false);
+              }}
+            >
+              Register
+            </li>
+          </>
+        )}
       </ul>
 
       <div

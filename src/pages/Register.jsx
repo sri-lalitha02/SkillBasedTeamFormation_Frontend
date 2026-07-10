@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 import Header from "../components/Header";
+
+import StepOne from "../components/Register/StepOne";
+import StepTwo from "../components/Register/StepTwo";
+import StepThree from "../components/Register/StepThree";
+
+import ProgressBar from "../components/Register/ProgressBar";
+import ProfilePreview from "../components/Register/ProfilePreview";
+
 
 import "../styles/Register.css";
 
@@ -37,6 +44,7 @@ export default function Register() {
 
 
   const [errors, setErrors] = useState({});
+  const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -108,6 +116,9 @@ export default function Register() {
       ...prev,
       [name]: error
     }));
+
+    return error;
+
   };
 
 
@@ -122,6 +133,54 @@ export default function Register() {
     validateField(name, value);
   };
 
+  const nextStep = () => {
+
+    if (step === 1) {
+
+      const firstNameError = validateField("firstName", form.firstName);
+      const lastNameError = validateField("lastName", form.lastName);
+      const emailError = validateField("email", form.email);
+      const mobileError = validateField("mobile", form.mobile);
+      const passwordError = validateField("password", form.password);
+      const confirmPasswordError = validateField(
+        "confirmPassword",
+        form.confirmPassword
+      );
+
+      if (
+        firstNameError ||
+        lastNameError ||
+        emailError ||
+        mobileError ||
+        passwordError ||
+        confirmPasswordError
+      ) {
+        return;
+      }
+
+    }
+
+    if (step === 2) {
+
+      const experienceError = validateField("experience", form.experience);
+      const roleError = validateField("role", form.role);
+      const skillsError = validateField("skills", form.skills);
+      const genderError = validateField("gender", form.gender);
+
+      if (
+        experienceError ||
+        roleError ||
+        skillsError ||
+        genderError
+      ) {
+        return;
+      }
+    }
+
+    setStep(step + 1);
+
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -132,28 +191,17 @@ export default function Register() {
     let newErrors = {};
 
     Object.keys(form).forEach((key) => {
-      validateField(key, form[key]);
+      const error = validateField(key, form[key]);
 
-      if (
-        !form[key] &&
-        key !== "github" &&
-        key !== "linkedin" &&
-        key !== "portfolio" &&
-        key !== "bio"
-      ) {
-        newErrors[key] = "Required field";
+      if (error) {
+        newErrors[key] = error;
       }
     });
 
     setErrors(newErrors);
 
     if (Object.values(newErrors).some(err => err)) {
-      setLoading(false);   // ✅ FIX
-      return;
-    }
-
-    if (form.password !== form.confirmPassword) {
-      setLoading(false);   // ✅ FIX
+      setLoading(false);
       return;
     }
 
@@ -253,210 +301,62 @@ export default function Register() {
               <h1>Create Your Account</h1>
               <p>Fill your details to get started</p>
 
-              {/* Full Name 1 */}
-              <div className="row">
-                <div className="field">
-                  <label>First Name *</label>
-                  <input name="firstName" onChange={handleChange} />
+               <ProgressBar step={step} />
 
-                  {errors.firstName && (
-                    <span className="error">{errors.firstName}</span>
-                  )}
-                </div>
+              {step === 1 && (
+                <StepOne
+                  form={form}
+                  handleChange={handleChange}
+                  errors={errors}
+                  showPassword={showPassword}
+                  setShowPassword={setShowPassword}
+                  showConfirmPassword={showConfirmPassword}
+                  setShowConfirmPassword={setShowConfirmPassword}
+                />
+              )}
 
-                <div className="field">
-                  <label>Last Name *</label>
-                  <input name="lastName" onChange={handleChange} />
-                  {errors.lastName && <span className="error">{errors.lastName}</span>}
-                </div>
-              </div>
+              {step === 2 && (
+                <StepTwo
+                  form={form}
+                  handleChange={handleChange}
+                  errors={errors}
+                />
+              )}
 
-              {/* EMAIL + MOBILE */}
-              <div className="row">
-                <div className="field">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    onChange={handleChange}
-                  />
-                  {errors.email && <span className="error">{errors.email}</span>}
-                </div>
+              {step === 3 && (
+                <>
+                <StepThree
+                  form={form}
+                  handleChange={handleChange}
+                />
+                 <ProfilePreview form={form} />
+                 </>
+              )}
 
-                <div className="field">
-                  <label>Mobile *</label>
-                  <input
-                    type="tel"
-                    name="mobile"
-                    maxLength={10}
-                    onChange={handleChange}
-                  />
-                  {errors.mobile && <span className="error">{errors.mobile}</span>}
-                </div>
-              </div>
+              <div className="step-buttons">
 
-              {/* PASSWORD */}
-              <div className="row">
-
-                <div className="field">
-                  <label>Password *</label>
-
-                  <div className="password-field">
-
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      onChange={handleChange}
-                    />
-
-                    <button
-                      type="button"
-                      className="eye-btn"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <FiEyeOff /> : <FiEye />}
-                    </button>
-
-                  </div>
-
-                  {errors.password && (
-                    <span className="error">
-                      {errors.password}
-                    </span>
-                  )}
-
-                </div>
-
-                <div className="field">
-                  <label>Confirm Password *</label>
-
-                  <div className="password-field">
-
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      onChange={handleChange}
-                    />
-
-                    <button
-                      type="button"
-                      className="eye-btn"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                    >
-                      {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-                    </button>
-
-                  </div>
-
-                  {errors.confirmPassword && (
-                    <span className="error">
-                      {errors.confirmPassword}
-                    </span>
-                  )}
-
-                </div>
-
-              </div>
-
-              {/* EXPERIENCE + ROLE */}
-              <div className="row">
-
-                <div className="field">
-                  <label>Experience *</label>
-                  <select name="experience" onChange={handleChange}>
-                    <option value="">Select</option>
-                    <option>Beginner</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                  </select>
-                  {errors.experience && (
-                    <span className="error">
-                      {errors.experience}
-                    </span>
-                  )}
-                </div>
-
-                <div className="field">
-                  <label>Preferred Role *</label>
-                  <select name="role" onChange={handleChange}>
-                    <option value="">Select</option>
-                    <option>Frontend Developer</option>
-                    <option>Backend Developer</option>
-                    <option>Full Stack Developer</option>
-                    <option>AI/ML Engineer</option>
-                    <option>DevOps</option>
-                    <option>Other</option>
-                  </select>
-                  {errors.role && (
-                    <span className="error">
-                      {errors.role}
-                    </span>
-                  )}
-                </div>
-
-              </div>
-
-              {/* SKILLS */}
-              <div className="row">
-
-                <div className="field">
-                  <label>Skills *</label>
-                  <input
-                    name="skills"
-                    placeholder="React, Node.js, MongoDB"
-                    onChange={handleChange}
-                  />
-                  {errors.skills && (
-                    <span className="error">{errors.skills}</span>
-                  )}
-                </div>
-
-                <div className="field">
-                  <label>Gender *</label>
-                  <select
-                    name="gender"
-                    onChange={handleChange}
+                {step > 1 && (
+                  <button
+                    type="button"
+                    className="prev-btn"
+                    onClick={() => setStep(step - 1)}
                   >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
+                    Previous
+                  </button>
+                )}
 
-                  {errors.gender && (
-                    <span className="error">{errors.gender}</span>
-                  )}
-                </div>
+                {step < 3 && (
+                  <button
+                    type="button"
+                    className="next-btn"
+                    onClick={nextStep}
+                  >
+                    Next
+                  </button>
+                )}
 
               </div>
-              <br />
 
-              {/* LINKS */}
-              <div className="row">
-                <div className="field">
-                  <label>GitHub</label>
-                  <input type="url" name="github" onChange={handleChange} />
-                </div>
-
-                <div className="field">
-                  <label>LinkedIn</label>
-                  <input type="url" name="linkedin" onChange={handleChange} />
-                </div>
-              </div>
-
-              {/* PORTFOLIO + BIO */}
-              <div className="row">
-                <div className="field">
-                  <label>Portfolio</label>
-                  <input type="url" name="portfolio" onChange={handleChange} />
-                </div>
-
-                <div className="field">
-                  <label>Bio</label>
-                  <textarea name="bio" onChange={handleChange} />
-                </div>
-              </div>
               {/* TERMS */}
               <div className="terms">
                 <input
@@ -475,14 +375,15 @@ export default function Register() {
               </div>
 
               {/* BUTTON */}
-              <button
-                type="submit"
-                className="create-btn"
-                disabled={loading}
-              >
-                {loading ? "Creating Account..." : "Create Account"}
-              </button>
-
+              {step === 3 && (
+                <button
+                  type="submit"
+                  className="create-btn"
+                  disabled={loading}
+                >
+                  {loading ? "Creating Account..." : "Create Account"}
+                </button>
+              )}
               {/* TERMS MODAL */}
               {showTerms && (
                 <div className="modal-overlay">
